@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Radar"
+  short_description: "先检索并评估论文，再按用户选择下载；支持个人期刊评级与机构配置"
+  default_prompt: "使用 $research-radar，先检查我的配置；有缺项时让我选择补全或接受限制继续，再以多来源、扩词和引用追踪深入检索，核对论文核心主张、证据边界及评审判断后评估 Q/M/S，报告实际覆盖、待核验问题与带编号的结果，等我选择后仅下载所选论文。"
