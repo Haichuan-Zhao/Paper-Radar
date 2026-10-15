@@ -2,137 +2,152 @@
 
 [English](README.md) | 简体中文
 
-**围绕研究问题找论文，依据证据评估，再下载你选择的文献。**
+**让 agent 深入搜集文献、依据证据评价，再获取用户选择的论文。**
 
-面向研究者的可移植文献筛选 skill：从用户原始需求检索期刊论文和预印本，
-核验论文/期刊身份与版本，再依据全文、方法和图表证据评价内容质量 Q 与需求
-匹配度 M，形成有理由、有局限说明的阅读清单。使用宿主自身的 LLM。
-采用两步流程：**先检索并评估，展示带编号的结果；用户选择后再下载指定论文。**
+将 skill 安装到 **Claude Code、Codex 等支持 Agent Skills 的 harness**，
+编辑一份个人 Markdown 配置文件，然后直接提出研究需求。agent 使用宿主已有的搜索、
+浏览器、文献连接器、阅读与文件工具完成操作。
+**使用 skill 无需 Python、Node.js、安装依赖或运行 CLI。**
 
-采用 [MIT 许可证](LICENSE)。运行要求 Python 3.9+ 标准库与 HTTPS；全文阅读、
-图片查看和机构登录由宿主提供相应能力。
+Research Radar 分开评估**论文内容质量 Q** 与**原始需求匹配度 M**。
+期刊评级提供背景与可选过滤，内容评价依据方法、结果、主张、图表及其局限。
 
-## 从一份配置文档开始
+## 两步流程
 
-安装完整 [research-radar/](research-radar/) 目录到支持 Agent Skills 的宿主，
-或让 agent 读取 [SKILL.md](research-radar/SKILL.md) 并执行其中的 CLI。
-不同宿主的发现/执行方式见 [部署说明](research-radar/references/deployment.md)。
+| 阶段 | agent 执行 | 用户得到 |
+|---|---|---|
+| 1. 搜集与评估 | 检查配置，多来源检索、扩词和引用追踪，核验身份，阅读可用证据并审查主张 | 带固定编号的结果、Q/M/S 或待评、期刊信息、匹配理由、局限、证据与获取状态 |
+| 2. 选择后获取 | 将用户选择映射到这份清单，只下载指定论文 | 经过核验的文件与逐篇结果 |
 
-1. 复制 [用户配置文档](research-radar/USER_CONFIG.template.md) 到自己的
-   user-data/config.md，填写主题、原始需求、阅读目的和必要限制。
-2. 让 agent 根据原话补全英文检索式、概念组与明确日期；在同一份文档填写
-   自己的 key 的读取位置、评级偏好，以及可选的学校访问入口。
-3. 从 skill 目录执行以下命令，或让宿主按 skill 的绝对路径执行。
+第一步可打开合法全文并使用临时阅读缓存，不自动归档整批 PDF。
+agent 会等待“下载第 1、3 篇”这样的明确选择。补充材料和文献库写入需另行请求。
 
-```bash
-python3 radar.py validate --profile /path/to/user-data/config.md
-python3 radar.py preflight --profile /path/to/user-data/config.md
-python3 radar.py run --profile /path/to/user-data/config.md --out /path/to/user-data/new-run
-```
+## 安装一次
 
-JSON profile 同样支持。配置文档相对路径基于文档所在目录，运行结果使用新目录。
-普通检索产生候选和评审模板；agent 阅读实际全文及图表、填写 reviews 后执行：
+将完整 [research-radar/](research-radar/) 文件夹放入宿主的 skill 目录：
 
-```bash
-python3 radar.py assess --run /path/to/user-data/new-run --reviews /path/to/reviews.completed.jsonl
-```
+| 宿主 | 个人安装 | 项目安装 | 调用 |
+|---|---|---|---|
+| Claude Code | ~/.claude/skills/research-radar/ | .claude/skills/research-radar/ | /research-radar |
+| Codex | ~/.agents/skills/research-radar/ | .agents/skills/research-radar/ | $research-radar |
 
-EasyScholar key 和学校邮箱都从这份配置文档开始设置，无需项目服务器或网页上传。
-从 skill 目录在自己的交互终端执行：
+路径核对自 2026-10-15 的
+[Claude Code 官方文档](https://code.claude.com/docs/en/skills) 和
+[Codex 官方文档](https://learn.chatgpt.com/docs/build-skills)。
+旧版本、受管或云环境以实际产品说明为准。其他宿主可读取
+[SKILL.md](research-radar/SKILL.md) 及其相对资源。
+详见 [部署说明](research-radar/references/deployment.md)。
 
-```bash
-python3 scripts/credentials.py configure --service easyscholar --out /path/to/user-data/private/api-keys.json
-python3 scripts/institution_credentials.py configure --profile my-school --out /path/to/user-data/private/institution-accounts.json
-```
+无需固定 MCP、额外模型 API key 或其他 skill。skill 组织宿主已有能力，
+不会自动给 harness 新增工具或权限。
 
-第一条隐藏输入 key；将文档中的 easyscholar.credentials_file 改为
-"private/api-keys.json"。第二条先输入学校邮箱/图书馆登录账号，再输入密码；学校
-用学号登录就填学号。文档内 routing 填学校、图书馆与 SSO 网址，填好后启用机构访问。
-邮箱本身不能确定登录入口或订阅权限。私有文件为本地明文、POSIX 权限 600；
-也可使用宿主私密环境变量。用户数据放在项目外，或已忽略的 user-data/ 下。
-详见 [凭据说明](research-radar/references/credentials.md) 与
-[机构适配说明](research-radar/references/institution-login.md)。
+## 直接编辑 USER_CONFIG.md
 
-模板、配置脚本和 [运行前检查说明](research-radar/references/preflight.md) 均包含在
-skill 分发包内。每次 run 都先检查：配置缺项返回退出码 3，在任何检索之前让用户
-选择先补全还是接受列明的限制继续。只有用户已选择继续，宿主才加
---continue-with-gaps；决定和临时降级写入本次 preflight.json，不改用户原文件。
-本地凭据存在与远端有效、真实登录、论文订阅权限分别记录。
+首次对 agent 说：
 
-## 两步使用
+> 使用 Research Radar，帮我建立用户配置。
 
-1. **搜集并打分**：默认 deep，多组互补检索式、多来源及完整分页，继续扩词、
-   前后向引用追踪与漏检补查，记录轮次、覆盖及停止原因；count 只限制阅读目标，
-   不限制候选搜集。按原始提示核验、阅读和评分，展示固定编号、Q/M/S、
-   评级来源、匹配理由、局限及获取状态。第一步允许打开合法全文和临时阅读缓存；
-   无法读到完整证据时保留 Q/S 待评，不自动归档整批 PDF。assess 输出
-   reading-list.md 和 selection-catalog.json。
-2. **选择后下载**：用户回复“下载第 1、3、5 篇”，agent 核对这份结果的编号与版本，
-   仅下载所选正文，验证文件并逐篇报告结果；SI 和 Zotero 导入按另行明确的需求执行。
+agent 会将 [USER_CONFIG.example.md](research-radar/USER_CONFIG.example.md)
+复制为**当前研究工作目录的 USER_CONFIG.md**，不覆盖已有文件，并给出可打开路径。
+用户直接编辑普通 Markdown 表格，也可以指定另一个位置的配置副本。
+无需编写 JSON 或检索式。
 
-宿主用下面的命令生成第二步计划，然后通过自己的合法获取工具执行：
-
-```bash
-python3 radar.py select --assessment /path/to/user-data/new-run/assessment --numbers 1,3,5 --out /path/to/user-data/chosen-downloads
-```
-
-select 生成 download-plan.json 和 selected-papers.jsonl，核验编号对应的论文与版本，
-不发起网络请求。实际下载依赖宿主文件/浏览器工具，获取方式与校验要求见
-[下载说明](research-radar/references/download-and-zotero.md)。
-
-深度检索由宿主按 search-plan.json 执行并填写 search-ledger.completed.json，
-可用 radar.py audit-search 核验步骤、引用来源及连续零新增轮次；内置关键词
-查询本身不会自动遍历引用。预算/授权/分页受限时标记部分检索。详见
-[深度检索与日志协议](research-radar/references/discovery-and-evidence.md)。
-
-## 筛选依据
-
-| 能力 | 实现与边界 |
+| 配置部分 | 可以填写的内容 |
 |---|---|
-| 文献检索 | Crossref、OpenAlex、arXiv、bioRxiv、medRxiv；保留分页、失败和截断的覆盖记录 |
-| 精确匹配 | DOI/原生 ID 与版本、有效 ISSN/ISSN-L、同名刊冲突；不自动合并模糊刊名 |
-| 期刊评级 | 用户自己的 EasyScholar key、机构 CSV/JSON；IF、JCR、WoS、CAS、CCF 和自定义评级保留来源及年份 |
-| 内容与匹配 | Q/M 分开，默认 S=Q^0.6×M^0.4；Q/M 均≥70，rigor/evidence 均≥3/5 |
-| 全文获取 | 已有 OA 链接、可选 Unpaywall/Europe PMC、用户文件、机构会话；不自动购买订阅 |
-| 评审与交付 | 证据锚点、真实阅读版本、分项得分、阅读理由、局限和待获取清单 |
+| 使用偏好 | 输出语言、希望精读篇数、预印本、搜索预算与结果目录 |
+| key 与服务 | 自己的 EasyScholar key 或私密引用，可选 OpenAlex key、本地评级表与 OA 联系邮箱 |
+| 学校图书馆 | 学校名称、真实图书馆/SSO 入口、允许域名、邮箱/账号、凭据引用和浏览器会话 |
+| 本次研究任务 | 完整原始需求、阅读目的、日期、软偏好、硬约束与种子论文 |
+| 评分与下载 | 质量权重/门槛、保存目录、补充材料与文献库导入偏好 |
 
-作者声望、高 IF 和精美图片不直接加内容分；预印本缺 IF 不扣分。最终质量需要
-阅读全文并真正看图，摘要只作初筛。缺证据保持待评，不填 0 或平均分凑数。
-评分权重是初始设计，可用人工标签校准，尚未完成领域准确率或召回率基准验证。
+聊天中的明确任务要求优先于保存的任务偏好。agent 自己展开学术术语、概念组与检索式，
+不要求用户设计 API 请求。
 
-评审使用 schema v5 / content-v4：逐条记录核心主张、支持与限制证据、实际适用
-范围及保守结论。优势、局限和阅读理由区分作者报告与评审判断并绑定原文锚点；
-重大疑点需针对性复核。核心主张未决时不生成最终 Q/S；主张需收窄时限制评分与
-推荐等级，不能用高综合分掩盖。旧评审需重新生成模板并补做审查。
-这些检查核验结构和证据声明，不能自动证明论文正确或保证消除 overclaim。
+key 可直接填在本地文档，也可填写宿主 secret 引用或环境变量名。
+**直接填写的 key/密码是明文，读取文件的宿主或模型可能看到它们。**
+学校密码优先使用私密引用或在真实网页登录。填写后的配置不要提交 GitHub。
+本仓库忽略 USER_CONFIG.md 和本地结果；公开示例保持空白，无需项目服务器或上传表单。
 
-匹配、评分、获取分别见 [matching.md](research-radar/references/matching.md)、
-[scoring.md](research-radar/references/scoring.md)、
-[fulltext-access.md](research-radar/references/fulltext-access.md)。
+**每次检索前** agent 检查已启用服务及真实能力。有缺项时先说明影响，
+由用户选择补全后开始，或明确接受本次限制再继续。凭据存在、真实有效、登录成功、
+文章订阅权限分别判断。
 
-机构凭据层与适配协议已经提供；具体网页的填写和会话校验需要宿主浏览器适配器，
-尚未验证真实学校登录。EasyScholar 不授予付费数据库全文权限。仅有脚本执行能力的
-宿主可完成元数据检索；阅读全文和图片评估仍取决于宿主实际具备的工具。
+## 直接对 agent 提需求
 
-## 开发与分发
+Claude Code 使用 /research-radar，Codex 使用 $research-radar，例如：
 
-```text
-research-radar/       唯一的 skill 源码、用户配置模板、参考协议和测试
-scripts/             发布打包和独立验证
-.github/workflows/   离线测试与分发包检查
-README.md            英文介绍
-README.zh-CN.md       中文介绍
-LICENSE              MIT
-```
+> 使用 Research Radar，读取我的 USER_CONFIG.md。在我指定的时间范围内，深入查找
+> 与原始研究问题匹配的论文，核验论文和期刊信息，依据实际可读全文评价。
+> 先展示带编号、质量、匹配度、局限和获取状态的结果，等我选择后再下载。
 
-在项目根目录执行：
+看过清单后：
+
+> 下载这份清单中的第 1、3、5 篇。
+
+两步均由 agent 在 harness 内执行，没有需要用户另行运行的研究程序。
+
+## 检索与证据
+
+- 根据主题与实际工具选择 Crossref、OpenAlex、arXiv、bioRxiv/medRxiv、领域索引
+  和出版社。完整处理实际分页，扩词并前后向追踪引用（默认两跳）。
+  希望精读的篇数不限制候选搜集数量。
+- 核对 DOI/原生 ID、日期依据、ISSN/ISSN-L、发表状态与真实版本；
+  模糊刊名不能直接关联评级。
+- 使用每位用户自己的 EasyScholar 数据或本地表，保留 IF/JCR/WoS/CAS/CCF/
+  自定义评级的来源、版次与年份。IF 不证明 WoS 收录。
+- 阅读实际全文并查看相关图表。只有摘要时保留质量待评，获取困难不降低内容分。
+- 使用随包协议和模板保存检索日志、证据锚点、逐篇评审和固定编号目录。
+
+详见 [深入检索](research-radar/references/discovery-and-evidence.md)、
+[期刊评级](research-radar/references/journal-metrics.md) 和
+[产物协议](research-radar/references/outputs.md)。
+
+## 质量、匹配与主张边界
+
+默认 **S = Q^0.6 × M^0.4**，Q、M 均为 0–100。
+
+| 指标 | 默认维度 |
+|---|---|
+| Q | 动机 15%、原创性 15%、严谨性 25%、证据 25%、可复核性 10%、图表/论证表达 10% |
+| M | 研究问题 45%、方法路径 25%、应用条件 20%、阅读目的 10% |
+
+推荐需要 Q/M ≥ 70、rigor/evidence ≥ 3/5、完整证据审查及用户要求的条件。
+作者声望、IF 与图片美观程度不加内容分，预印本缺评级不扣分。
+
+agent 审查核心主张，区分作者报告与评审判断，核对正面和负面评价的原始证据。
+核心主张或重大疑点未决时最终 Q/S 待评；需要收窄的主张限制分数与推荐等级，
+确认的核心证据失败不能由高综合分掩盖。
+
+这些是**宿主 agent 执行的指令与评审标准**，没有程序评分器强制保证，
+不能证明科学结论正确。量表可配置，尚未完成领域准确率/召回率基准验证。
+详见 [评分规则](research-radar/references/scoring.md) 和
+[质量评审](research-radar/references/quality-evaluation.md)。
+
+## 获取与能力边界
+
+可用 OA、用户文件和授权机构会话获取全文。EasyScholar 不授予收费数据库权限。
+学校访问需要真实入口、宿主浏览器/secret 能力、用户完成 MFA，以及学校实际订阅；
+没有通用学校登录器，不自动购买。
+
+无全文/图片工具时可以搜集候选，但相应内容维度保持待评；无下载/文件工具时不能
+声称已保存和核验。尚未完成所有 harness、真实学校登录与订阅访问的端到端测试。
+详见 [全文访问](research-radar/references/fulltext-access.md)。
+
+## 项目维护
+
+安装包仅含 Markdown 指令、模板、可选 UI 元数据与 MIT 许可，不含可执行研究流水线。
+仓库维护者可用 Node.js 20+ 标准库检查结构、保护公开配置示例和构建可复现归档；
+以下工具不随 skill 分发，也不是使用 skill 的要求：
 
 ```bash
-python3 -m unittest discover -s research-radar/tests
-python3 scripts/check_release.py
+node --test tests/package.test.mjs
+node scripts/check-skill.mjs
+node scripts/package-skill.mjs
 ```
 
-第二条命令构建并独立解压验证 dist/research-radar.zip 和 dist/research-radar.skill，
-检查文件白名单、哈希、文档链接及 CLI。dist/ 是可重建的发布产物，不进入源码提交；
-GitHub Release 可附带这两个归档。测试使用模拟数据，不需要真实 key 或学校账号。
-自动化通知和 Zotero 导入为可选功能，只有用户明确请求相关操作时执行。
+归档生成到被忽略的 dist/。
+[验收场景](tests/acceptance.md) 用于在真实宿主里复核行为；
+结构/打包检查不代表学术准确性或端到端兼容已经验证。
+旧程序入口及配套测试已移除，旧测试数量不适用于当前架构。
+
+采用 [MIT 许可](LICENSE)。

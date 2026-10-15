@@ -1,25 +1,55 @@
-# Harness 安装与可移植性
+# 在 harness 中安装与使用
 
-机构账号接口见 [institution-login.md](institution-login.md)：每位用户配置自己的学校、
-入口和凭据来源。核心提供本地凭据读取与登录适配协议；宿主需要实现具备私密输入
-和实时页面核验的浏览器适配器。没有该能力时，使用用户交互登录及会话复用。
-用户名密码不进入 LLM 工具参数，也不随 skill 一起分发。尚未验证各学校的真实登录。
+分发单元是完整的 research-radar 文件夹。宿主读取 SKILL.md，再按需读取 references
+与 assets，并用自己现有工具操作。没有研究运行时、依赖安装或固定模型/MCP 要求。
+agents/openai.yaml 仅供支持它的宿主显示 UI；其他宿主可忽略。
 
-分发单元是完整 research-radar/：SKILL.md、radar.py、scripts、references、示例以及可选 agents/openai.yaml。Python 3.9+ 标准库和 HTTPS 即可，无其他 skill、第三方包或固定 MCP 依赖。
+## 安装位置
 
-支持 Agent Skills 的宿主按自身安装/发现机制加载整个目录；没有自动发现的宿主可读取 SKILL.md 并按绝对路径执行 CLI。只能聊天、不能执行脚本的环境由用户本地执行后提供产物，不可声称自动运行成功。具体发现路径与权限随 harness 版本变化，以该产品文档为准；通用 skill 不硬编码私有工具名/用户主目录。agents/openai.yaml 仅是支持它的宿主的 UI 元数据。
+| 宿主 | 个人使用 | 项目使用 | 显式调用 |
+|---|---|---|---|
+| Claude Code | ~/.claude/skills/research-radar/ | .claude/skills/research-radar/ | /research-radar |
+| Codex | ~/.agents/skills/research-radar/ | .agents/skills/research-radar/ | $research-radar |
+| 其他 Agent Skills 宿主 | 按该宿主安装完整目录 | 按其发现机制 | 指明使用 research-radar 或读取 SKILL.md |
 
-1. 将整个目录安装到用户选择的 harness。
-2. 复制 [用户配置文档](../USER_CONFIG.template.md) 到用户数据目录，填写问题、queries、概念组和需要的评级开关。该 Markdown 可直接作为 --profile 输入，JSON 同样支持。
-3. 配置 secret 环境变量、引用本地私人 credentials JSON，或用 credentials.py configure 隐藏输入 key。学校邮箱/账号用 institution_credentials.py configure 的第一个提示输入，第二个输入密码；公开入口仍填在同一配置文档。
-4. 执行 validate、preflight；缺项由用户选择补全或接受限制继续，未选择前不开始检索。run 再次检查，只有已接受缺口才加 --continue-with-gaps。协议随包提供，见 [preflight.md](preflight.md)。
-5. 默认执行深度计划：多来源/查询分页，再由宿主扩词、引用追踪和缺口补查，填写检索日志并 audit-search；count 不限召回。agent 读取 matching-audit、coverage、review packet，实际阅读全文/图表/已有工作并填写 reviews，运行 assess 得 Q/M/S、带固定编号的阅读清单与 selection-catalog.json，报告实际覆盖，交付第一步结果并等待用户选择；可用人工标签 calibrate。
-6. 用户选择后，用 radar.py select --assessment RESULT_DIR --numbers 1,3 --out NEW_DIR 生成精确计划；宿主按计划获取并校验文件，交付第二步下载结果。select 本身只生成计划，无网络操作。
+这些路径核对于 2026-10-15 的
+[Claude Code 官方说明](https://code.claude.com/docs/en/skills) 和
+[Codex 官方说明](https://learn.chatgpt.com/docs/build-skills)；
+旧版本、托管云或受管环境按实际产品要求操作。不要承诺所有版本已经实测。
 
-数据文件相对 profile；脚本/参考相对 skill。JSON/JSONL/CSV/Markdown 协议便于在不同宿主复用。网络/授权缺失如实报告覆盖范围。
+下载仓库后，可以直接让 agent：
+“把这里的 research-radar 文件夹安装到我指定的 skill 目录，不覆盖已有个人配置。”
+安装和配置不自动触发文献检索。对安装的授权不包括开启新连接器或改宿主安全设置。
 
-全文路由见 [fulltext-access.md](fulltext-access.md)。脚本无密钥即可复用来源的 OA 元数据；Unpaywall 补查需每位用户自己的联系邮箱。机构配置绑定真实稳定入口及原有浏览器，会话和付费权限由宿主实际确认。不能操作浏览器的 harness 仍可使用 OA/已有用户文件并输出机构 handoff；它不能凭 profile 声称完成了订阅访问。review schema v5 绑定实际阅读材料与版本，另需核心主张审查及有锚点的交付判断，缺全文保持待评和待获取。
+## 使用
 
-科学判断使用宿主自身 LLM，不依赖固定厂商、MCP 或另一套模型 API key。全文/PDF/图片能力因宿主而异：真正看图才填写 figures_inspected；纯文本或无全文环境保持相关维度 null 和待评。作者/期刊 context 与内容 packet 分开，减少声望对判断的影响。
+首次调用说“使用 Research Radar 帮我配置”。agent 会将 USER_CONFIG.example.md
+复制到当前研究目录的 USER_CONFIG.md，并给出可打开的路径；用户直接编辑表格。
+个人 key、学校邮箱/账号、真实图书馆入口及偏好在同一文件里维护。
+后续也可指定“读取另一目录中的 USER_CONFIG.md”。
 
-从开发项目根执行 `python3 scripts/package_skill.py`。固定白名单仅纳入入口、示例、Python helper、references 和 UI 元数据，排除测试、真实配置、credentials、cache、runs、bytecode。产出 ZIP、.skill 归档及 SHA-256 manifest。解压到独立目录运行 --help/validate/doctor 验证开发目录独立性。打包通过不代表已在所有 harness 实际安装测试。
+然后用聊天提出问题：
+“使用 Research Radar，读取我的 USER_CONFIG.md，深入查找与这个问题匹配的论文，
+先给带编号、质量/匹配分、证据局限和获取状态的结果，等我选择后再下载。”
+
+## 实际能力决定执行范围
+
+| 宿主能力 | 能完成的工作 | 缺失时的边界 |
+|---|---|---|
+| 文件读取 | 读取 skill、配置和证据 | 由用户提供内容，不假称已安装/读取 |
+| 搜索、网页或文献连接器 | 真实检索、核验来源和引用追踪 | 无网络就不能声称完成在线搜集 |
+| PDF/全文 | 阅读实际版本的方法、结果和局限 | 摘要初筛，Q/S 待评 |
+| 图片/页面渲染 | 实际检查图表 | 未看图保持对应维度待评 |
+| 私密 HTTP/secret 能力 | 调用用户的 key | 不把 key 暴露给公共搜索工具 |
+| 浏览器会话 | 机构网页与人工登录交接 | OA/用户文件与机构待获取队列 |
+| 文件写入/下载/检查 | 保存结果、下载并验证所选论文 | 交付聊天结果或链接，下载状态待完成 |
+
+不要为适配不同工具名重写 skill 的科学规则。选用本次确实可用的工具，
+缺少能力按 [运行前协议](preflight.md) 征求取舍。skill 不能给宿主新增工具或权限。
+
+## 从旧版迁移
+
+当前版本移除了原来的程序入口和 JSON profile 工作流。旧文献和个人凭据无需删除；
+用户可以在新配置文档中引用既有私密存储，由宿主按自身能力读取。
+旧评审是历史材料，不能直接冒充本次 agent 的实际阅读、证据审查或下载记录。
+旧测试数量不能作为当前纯 skill 的行为验证结果；维护检查只覆盖结构和分发。

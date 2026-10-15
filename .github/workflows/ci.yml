@@ -1,4 +1,4 @@
-name: Test and package
+name: Validate and package skill
 
 on: [push, pull_request]
 
@@ -9,16 +9,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ["3.9", "3.12", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: ${{ matrix.python }}
-      - run: python -m unittest discover -s research-radar/tests
-      - run: python scripts/check_release.py
+      - run: node --version
+      - run: node --test tests/package.test.mjs
+      - run: node scripts/check-skill.mjs
+      - run: node scripts/package-skill.mjs
+      - run: unzip -t dist/research-radar.zip

@@ -2,222 +2,177 @@
 
 English | [简体中文](README.zh-CN.md)
 
-**Find papers that matter to your research, assess the evidence, and download the ones you choose.**
+**An Agent Skill for deep literature discovery, evidence-grounded assessment and selected-paper retrieval.**
 
-Research Radar is a portable Agent Skill for discovering journal articles and preprints,
-checking paper and journal identities, and building an evidence-grounded reading list.
-It uses the host agent's LLM to assess **paper quality (Q)** and **fit to your original
-request (M)** separately. Journal metrics provide context; the paper's methods,
-results, figures and limitations determine its content assessment.
+Install the skill in **Claude Code, Codex or another Agent Skills harness**, edit
+one personal Markdown file, and ask the agent to find papers. The agent carries
+out the workflow with the harness's search, browser, connector, reading and file
+tools. **Using the skill requires no Python, Node.js, package installation or CLI.**
 
-The workflow has two steps: **search and assess first; download only after you select papers.**
+Research Radar assesses **content quality Q** and **fit to your original request M**
+separately. Journal ratings provide context and optional filters; methods,
+results, claims and figures determine the content review.
 
-- **Deep discovery:** complementary queries across Crossref, OpenAlex, arXiv,
-  bioRxiv and medRxiv, with pagination and an auditable search ledger.
-- **Identity checks:** DOI/native identifiers, publication versions, dates,
-  ISSN/ISSN-L and ambiguous journal names.
-- **Your own journal data:** EasyScholar keys and local CSV/JSON metric tables,
-  retaining source, edition and year for IF, JCR, WoS, CAS, CCF and custom ratings.
-- **Evidence-based review:** source anchors for claims, strengths, limitations,
-  quality scores and reading recommendations, with checks against overclaiming.
-- **User-controlled access:** open-access routes, user-provided files and
-  optional institutional browser handoff using each user's own configuration.
+## Two stages, controlled by you
 
-Licensed under [MIT](LICENSE). The Python helpers require **Python 3.9+**, the
-standard library and HTTPS. Full-text reading, image inspection and institutional
-browser actions require suitable tools in the host agent.
-
-## How the two steps work
-
-| Step | What happens | What you receive |
+| Stage | The agent does | You receive |
 |---|---|---|
-| 1. Discover and assess | Check configuration, expand the research question into queries, retrieve and verify candidates, read available evidence and review claims | A numbered reading list with Q/M/S, metric provenance, reasons to read, limitations and access status |
-| 2. Select and download | You choose numbers from that list; the agent resolves the frozen paper/version mapping and retrieves only those papers | Validated selected files and a per-paper download outcome |
+| 1. Discover and assess | Check your configuration, search complementary sources, expand queries and trace citations, verify identities, read available evidence and review claims | Numbered results with Q/M/S or pending, journal information, fit reasons, limitations, evidence and access status |
+| 2. Select and retrieve | Resolve your choices against that exact list and download only the selected papers | Verified files and a per-paper outcome |
 
-Step 1 may open lawful full text and use temporary reading caches to support review.
-It does not automatically archive a batch of PDFs. When evidence is unavailable,
-Q/S stay pending and the paper remains in the review or access queue.
-Supplementary information and Zotero import require an explicit request.
+The first stage may open lawful full text and temporary reading caches for review.
+It does not automatically archive a batch of PDFs. The agent waits for a choice
+such as “Download papers 1 and 3.” Supplementary files and library imports require
+a separate request.
 
-## Installation
+## Install once
 
-Clone or download this repository and install the **entire
-[research-radar/](research-radar/)** directory using your harness's skill mechanism.
-The entry point is [SKILL.md](research-radar/SKILL.md). Hosts without automatic skill
-discovery can read that file and execute the bundled CLI using its absolute path.
+Copy the complete [research-radar/](research-radar/) directory into your harness's
+skill location:
 
-No additional model API key, fixed MCP server or other skill is required. Actual
-script, network, PDF, image and browser capabilities depend on the harness.
-See [deployment and portability](research-radar/references/deployment.md) for the
-capability requirements and installation boundaries.
+| Harness | Personal installation | Project installation | Invoke |
+|---|---|---|---|
+| Claude Code | ~/.claude/skills/research-radar/ | .claude/skills/research-radar/ | /research-radar |
+| Codex | ~/.agents/skills/research-radar/ | .agents/skills/research-radar/ | $research-radar |
 
-## One document for your configuration
+Locations follow the [Claude Code documentation](https://code.claude.com/docs/en/skills)
+and [Codex documentation](https://learn.chatgpt.com/docs/build-skills), checked
+2026-10-15. Use your installed product's requirements for older, managed or cloud
+environments. Other hosts can load [SKILL.md](research-radar/SKILL.md) and its
+relative resources. See [deployment](research-radar/references/deployment.md).
 
-Copy [USER_CONFIG.template.md](research-radar/USER_CONFIG.template.md) into your own
-data directory, for example `user-data/config.md`. Keep the installed template blank.
-Fill in your research question, original prompt, reading purpose, dates and constraints;
-the agent can help derive scholarly queries and concept groups from your wording.
-Keep preferences distinct from mandatory exclusions.
+No fixed MCP server, additional model API key or other skill is required.
+The skill orchestrates tools you already have; it does not add capabilities or
+permissions to the harness.
 
-This document also contains references to your own keys and optional school access.
-There is no project server or upload form. Store credentials locally or use the
-host's secret environment; do not paste them into chat or commit them to GitHub.
+## Edit one USER_CONFIG.md
 
-Run these commands in **your own interactive terminal**, from the installed skill
-directory, replacing `/path/to/user-data` with your data directory:
+Start with:
 
-```bash
-python3 scripts/credentials.py configure --service easyscholar --out /path/to/user-data/private/api-keys.json
-python3 scripts/institution_credentials.py configure --profile my-school --out /path/to/user-data/private/institution-accounts.json
-```
+> Use Research Radar and help me configure it.
 
-| Information | Where to configure it |
+The agent copies [USER_CONFIG.example.md](research-radar/USER_CONFIG.example.md)
+to **USER_CONFIG.md in your current research workspace**, without overwriting an
+existing file, and shows you the path. Edit its ordinary Markdown tables directly,
+or tell the agent the path to another copy. No JSON or query syntax is needed.
+
+| Section | What you can edit |
 |---|---|
-| EasyScholar key | Enter it at the hidden terminal prompt; set `easyscholar.credentials_file` in your document to `"private/api-keys.json"` |
-| Library email or account and password | Use the institution helper's prompts; enter the account type your school actually uses |
-| School and login entry points | Fill `fulltext_access.institution.routing`, including school name, library URL, SSO URL and allowed domains; enable institutional access when ready |
-| Optional OpenAlex key or local rating tables | Use the corresponding credential reference or `venue_metrics_files` fields in the same document |
+| Preferences | Output language, reading target, preprints, search budget and result directories |
+| Keys and services | Your own EasyScholar key or secret reference, optional OpenAlex key, local metric files and OA contact email |
+| Institutional library | School name, actual library/SSO entry points, allowed domains, email/account, private credential reference and browser session |
+| Research task | Original question, purpose, dates, soft preferences, hard constraints and seed papers |
+| Assessment and downloads | Quality weight/floors, download destination, optional SI and library import preferences |
 
-The credential helpers save **local plaintext files** with POSIX mode `600`.
-Host-managed secret environments are an alternative. A school email alone does not
-identify a login route or prove subscription entitlement. Unpaywall's contact email
-is a separate service setting. Configuration paths are relative to the document's
-directory; JSON profiles are also supported.
+Your current chat request overrides saved task preferences. The agent derives
+scholarly queries and concept groups itself; you do not have to design API requests.
 
-See [credentials](research-radar/references/credentials.md) and
-[institutional access](research-radar/references/institution-login.md) for the exact
-formats, login adapter contract and human MFA/captcha handoff.
+You may enter an API key directly in the local document, or use an environment
+variable/host secret reference. **Inline keys and passwords are plaintext and may
+be visible to the host/model reading the file.** Prefer secret references or
+human browser login for school passwords. Do not commit a filled configuration
+to GitHub. This repository ignores USER_CONFIG.md and local research outputs;
+the public example stays blank. There is no project account server or upload form.
 
-## Quick start
+Before **every search**, the agent checks enabled services and actual capabilities.
+If required information is missing, it explains the impact and waits for your
+choice to complete setup or accept the named limitations for that run.
+A saved password is not proof of login, and login is not proof of access to a paper.
 
-Ask the host agent to use Research Radar with your configuration document, for example:
+## Ask the agent directly
 
-> Use Research Radar with my config.md. Search deeply for papers addressing my
-> research question, verify identities and journal information, then assess the
-> available full-text evidence. Show numbered results with quality, fit, limitations
-> and access status. Wait for my paper selection before downloading.
+In Claude Code, use /research-radar; in Codex, use $research-radar, for example:
 
-The commands below run **from the skill directory**. Use a new output directory for
-each run and replace all example paths with your own.
+> Use Research Radar with my USER_CONFIG.md. Search deeply for papers addressing
+> my research question within the date range I give. Verify paper and journal
+> identities, review the actual full-text evidence where available, and show
+> numbered results with quality, fit, limitations and access status.
+> Wait for my selection before downloading.
 
-```bash
-python3 radar.py validate --profile /path/to/user-data/config.md
-python3 radar.py preflight --profile /path/to/user-data/config.md
-python3 radar.py run --profile /path/to/user-data/config.md --out /path/to/user-data/new-run
-```
+After reviewing the results:
 
-Every `run` checks configuration before discovery. Missing enabled keys, account
-information or other required settings cause exit code `3`: the agent explains the
-gaps and lets you complete the configuration or explicitly accept the limitations.
-Only after you choose to continue may it add `--continue-with-gaps`. The decision is
-recorded in the run's `preflight.json` without rewriting your original configuration.
-Local credential presence, remote validity, login and paper entitlement are separate
-states. See the [preflight protocol](research-radar/references/preflight.md).
+> Download papers 1, 3 and 5 from this list.
 
-`run` creates candidate records, a search plan/ledger template and review packets.
-The host executes query expansion, citation tracing and gap searches, records its
-actual work, and reads full text and figures. Built-in keyword adapters do not
-automatically perform the citation traversal. The default deep plan includes two
-citation hops; `count` sets the desired reading-list size, not a retrieval cap.
-Pagination, budgets and unavailable sources must remain visible in coverage reports.
-See [discovery and evidence](research-radar/references/discovery-and-evidence.md).
+The agent performs both stages through the harness. There is no separate research
+driver or command for you to run.
 
-After the host completes evidence-grounded reviews:
+## Discovery and evidence
 
-```bash
-python3 radar.py assess --run /path/to/user-data/new-run --reviews /path/to/reviews.completed.jsonl
-```
+- Choose relevant scholarly sources such as Crossref, OpenAlex, arXiv,
+  bioRxiv/medRxiv, field indexes and publisher pages according to available tools.
+  Paginate real result sets, expand queries and trace backward/forward citations
+  (two hops by default). A reading target is not a retrieval cap.
+- Verify DOI/native ID, date basis, journal ISSN/ISSN-L, publication status and
+  actual version. Similar journal names do not automatically share ratings.
+- Use each user's own EasyScholar data or local metric tables. Preserve source,
+  edition and year for IF/JCR/WoS/CAS/CCF/custom ratings. IF does not prove WoS inclusion.
+- Read the actual paper and inspect relevant figures. Abstract-only candidates
+  stay pending quality review. Access difficulty does not lower content quality.
+- Keep search logs, evidence anchors, per-paper reviews and a frozen selection
+  catalog using the bundled protocols and templates.
 
-The assessment produces `reading-list.md` and `selection-catalog.json` in the run's
-`assessment/` directory by default. Read the list, then select papers, for example:
+See [discovery](research-radar/references/discovery-and-evidence.md),
+[journal metrics](research-radar/references/journal-metrics.md) and
+[outputs](research-radar/references/outputs.md).
 
-> Download papers 1, 3 and 5 from this reading list.
+## Quality and fit, with bounded claims
 
-The host creates a version-bound plan:
+Default **S = Q^0.6 × M^0.4**, with Q and M on a 0–100 scale.
 
-```bash
-python3 radar.py select --assessment /path/to/user-data/new-run/assessment --numbers 1,3,5 --out /path/to/user-data/chosen-downloads
-```
-
-`select` writes `download-plan.json` and `selected-papers.jsonl`; it makes no network
-requests. The host then performs and validates the actual downloads using lawful
-access tools. See [download and Zotero](research-radar/references/download-and-zotero.md).
-
-## Quality, fit and overclaim control
-
-The default priority score is **S = Q^0.6 × M^0.4**. Both Q and M use a 0–100 scale.
-Recommendation gates require Q ≥ 70, M ≥ 70, and rigor/evidence ≥ 3 out of 5,
-alongside the claim and evidence checks.
-
-| Score | Default dimensions and weights |
+| Axis | Default dimensions |
 |---|---|
-| Content quality Q | Motivation 15%, originality 15%, rigor 25%, evidence 25%, reproducibility 10%, figure quality 10% |
-| Prompt fit M | Research problem 45%, approach 25%, context 20%, reading intent 10% |
+| Q | Motivation 15%, originality 15%, rigor 25%, evidence 25%, reproducibility 10%, figure/argument clarity 10% |
+| M | Research problem 45%, approach 25%, context 20%, reading intent 10% |
 
-Author reputation, journal prestige, IF and visual polish do not directly add Q
-points. Preprints are assessed on their content without a penalty for lacking IF.
-Abstracts support triage; a final quality review requires actual full-text and
-relevant figure/table inspection. Missing evidence remains unknown rather than zero.
+Recommendation requires Q/M ≥ 70, rigor/evidence ≥ 3 out of 5, completed evidence
+review and the requested constraints. Prestige, IF and visual polish add no Q
+points; preprints are not penalized for lacking journal ratings.
 
-Review schema **v5 / content-v4** requires a central-claim audit with source anchors,
-supporting and limiting evidence, scope and bounded conclusions. Review statements
-distinguish author reports from reviewer judgments. Unresolved central claims block
-final Q/S; qualified claims cap scores and recommendations. Confirmed core failures
-cannot be hidden by a high composite score. Suspected flaws require focused checks
-before they can be reported as confirmed. Older reviews need a new template and audit.
+The agent audits central claims, distinguishes author reports from reviewer
+judgments and checks both praise and criticism against source evidence.
+Unresolved central claims or major findings leave final Q/S pending.
+Qualified claims cap scores and recommendation strength; confirmed core evidence
+failures cannot be hidden by a high composite score.
 
-The checks validate structure, evidence declarations and scoring gates. They do not
-prove scientific correctness, semantic entailment, successful reproduction or the
-absence of overclaiming. The initial weights remain configurable and have **not**
-been validated as a field-wide accuracy or recall benchmark.
+These are **instructions and review criteria applied by the host agent**, not
+a machine-enforced scoring engine or scientific certification. The rubric is
+configurable and has not been validated as a field-wide accuracy/recall benchmark.
+See [scoring](research-radar/references/scoring.md) and
+[quality evaluation](research-radar/references/quality-evaluation.md).
 
-Read the [scoring specification](research-radar/references/scoring.md),
-[quality review protocol](research-radar/references/quality-evaluation.md) and
-[matching protocol](research-radar/references/matching.md) for the full contracts.
+## Access limits
 
-## Access and current limits
+OA, user files and authorized institutional sessions are possible routes.
+EasyScholar does not grant paid full-text access. School login depends on actual
+entry points, host browser/secret capabilities, human MFA and the institution's
+entitlement. There is no universal school login adapter or automatic purchase.
 
-- Full-text routes include known OA links, optional Unpaywall/Europe PMC lookup,
-  user-provided files and authorized institutional sessions. Availability is recorded
-  separately from quality. See [full-text access](research-radar/references/fulltext-access.md).
-- EasyScholar enriches journal information; it does not grant paid database access.
-  WoS indexes and JCR quartiles are distinct fields and cannot be inferred from IF.
-- Institutional credential helpers and adapter contracts are provided. Actual page
-  interaction and session verification require a host browser adapter or human login.
-  Real school logins and subscription access have not been validated by this project.
-- A script-only host can retrieve metadata and prepare review queues. Full-text
-  judgment and visual assessment depend on the host's actual reading tools.
-- Deep search records source limits and stop reasons; it cannot guarantee exhaustive
-  coverage or independently verified scientific judgments.
+A host without full-text/image tools can discover candidates but must keep
+unread dimensions pending. A host without download/file tools must not claim
+to have saved or verified files. Real cross-harness behavior, school logins and
+subscription access have not all been tested. See
+[full-text access](research-radar/references/fulltext-access.md).
 
-## Development and packaging
+## Repository and maintenance
 
-```text
-research-radar/       Skill entry point, Python helpers, configuration template, references and tests
-scripts/             Deterministic packaging and independent release validation
-.github/workflows/   Offline tests and package checks
-README.md            English introduction
-README.zh-CN.md       Chinese introduction
-LICENSE              MIT license
-```
+The installed skill contains Markdown instructions, templates, optional UI
+metadata and its MIT license. It contains no executable research pipeline.
 
-From the repository root:
+Repository-only maintenance uses Node.js 20+ and standard libraries to check
+documentation, protect the public configuration example and build deterministic
+archives. These commands are **for maintainers**, are excluded from the skill
+bundle, and are not required for research use:
 
 ```bash
-python3 -m unittest discover -s research-radar/tests
-python3 scripts/check_release.py
+node --test tests/package.test.mjs
+node scripts/check-skill.mjs
+node scripts/package-skill.mjs
 ```
 
-The release check builds `dist/research-radar.zip` and `dist/research-radar.skill`,
-extracts and exercises the packaged CLI, and checks the allowlist, hashes,
-reproducibility and documentation links. Archives contain the skill and its MIT
-license; tests and developer tooling stay in the source repository. `dist/` is
-rebuildable and excluded from Git, along with private user data, credentials and runs.
+The package builder emits ZIP/.skill archives under ignored dist/.
+[Acceptance scenarios](tests/acceptance.md) describe behavior to verify in real
+harnesses; structural/package checks do not establish scientific accuracy or
+end-to-end compatibility. The former program-based workflow and its tests were
+removed; historical test counts do not apply to this architecture.
 
-Tests use offline fixtures and do not need real API keys or school accounts. The
-GitHub Actions workflow runs tests and release checks across Python 3.9, 3.12 and 3.14.
-These checks do not establish live service availability or installation in every harness.
-Optional notifications and Zotero import run only when explicitly requested.
-
-Contributions should include reproducible examples without secrets and distinguish
-offline checks from live validation. See [LICENSE](LICENSE) for the MIT terms.
+Licensed under [MIT](LICENSE).
