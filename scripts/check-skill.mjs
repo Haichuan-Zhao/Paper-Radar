@@ -11,17 +11,22 @@ export const BUNDLE_FILES = Object.freeze([
   'agents/openai.yaml',
   'assets/reading-list-template.md',
   'assets/review-template.md',
-  'references/deployment.md',
-  'references/discovery-and-evidence.md',
-  'references/download-and-zotero.md',
-  'references/fulltext-access.md',
-  'references/journal-metrics.md',
-  'references/matching.md',
-  'references/outputs.md',
-  'references/preflight.md',
-  'references/quality-evaluation.md',
-  'references/scoring.md',
-  'references/sources.md',
+  'assets/radar-template.md',
+  'references/access.md',
+  'references/harness.md',
+  'references/intake.md',
+  'references/loop.md',
+  'references/review.md',
+  'references/search.md',
+  'roles/reviewer.md',
+  'roles/scout.md',
+  'roles/verifier.md',
+]);
+
+export const ADAPTER_FILES = Object.freeze([
+  'WORKSPACE.md',
+  ...['claude-code', 'codex'].flatMap(host => ['reviewer', 'scout', 'verifier'].map(role =>
+    `${host}/agents/paper-${role}.${host === 'codex' ? 'toml' : 'md'}`)),
 ]);
 
 // Personal fields in the distributed example must remain empty. Never print values.
@@ -57,6 +62,7 @@ const PRIVATE_FIELDS = [
 async function walk(directory, prefix = '') {
   const files = [];
   for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
+    if (entry.name === '.DS_Store') continue; // Finder metadata is never a bundle input.
     const relative = path.posix.join(prefix, entry.name);
     if (entry.isSymbolicLink()) throw new Error('Symlinks are not allowed in the skill bundle.');
     if (entry.isDirectory()) files.push(...await walk(path.join(directory, entry.name), relative));
@@ -104,25 +110,31 @@ async function checkLinks(root, file) {
 }
 
 export async function validateSkill(root = PROJECT_ROOT) {
-  const bundleRoot = path.join(root, 'research-radar');
+  const bundleRoot = path.join(root, 'paper-radar');
   if ((await fs.lstat(bundleRoot)).isSymbolicLink()) throw new Error('Skill directory must not be a symlink.');
   const actual = await walk(bundleRoot);
   if (JSON.stringify(actual) !== JSON.stringify([...BUNDLE_FILES].sort())) {
     throw new Error('Skill bundle differs from the public allowlist; remove private/unexpected files or review the allowlist.');
   }
+  const adapters = path.join(root, 'adapters');
+  if ((await fs.lstat(adapters)).isSymbolicLink() ||
+      JSON.stringify(await walk(adapters)) !== JSON.stringify([...ADAPTER_FILES].sort())) {
+    throw new Error('Native adapter files differ from the public allowlist.');
+  }
   const skill = await fs.readFile(path.join(bundleRoot, 'SKILL.md'), 'utf8');
   const header = skill.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1];
-  if (!header || !/^name: research-radar$/m.test(header) || !/^description:\s*\S/m.test(header)) {
+  if (!header || !/^name: paper-radar$/m.test(header) || !/^description:\s*\S/m.test(header)) {
     throw new Error('Missing skill name or description in frontmatter.');
   }
   checkPublicConfig(await fs.readFile(path.join(bundleRoot, 'USER_CONFIG.example.md'), 'utf8'));
   const rootLicense = await fs.readFile(path.join(root, 'LICENSE'), 'utf8');
   const skillLicense = await fs.readFile(path.join(bundleRoot, 'LICENSE'), 'utf8');
   if (!rootLicense.startsWith('MIT License') || rootLicense !== skillLicense) throw new Error('MIT licenses must match.');
-  const documents = ['README.md', 'README.zh-CN.md', 'tests/acceptance.md',
-    ...BUNDLE_FILES.filter(file => file.endsWith('.md')).map(file => `research-radar/${file}`)];
+  const documents = ['README.md', 'README.en.md', 'tests/acceptance.md', 'tests/fixtures/casepack.md',
+    ...ADAPTER_FILES.filter(file => file.endsWith('.md')).map(file => `adapters/${file}`),
+    ...BUNDLE_FILES.filter(file => file.endsWith('.md')).map(file => `paper-radar/${file}`)];
   for (const file of documents) await checkLinks(root, file);
-  return { files: actual.length, documents: documents.length, runtime: 'host-agent' };
+  return { files: actual.length, adapters: ADAPTER_FILES.length - 1, documents: documents.length, runtime: 'host-agent' };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Research Radar"
-  short_description: "由宿主 agent 直接检索、审查并评分；读取个人配置，按选择下载"
-  default_prompt: "使用 $research-radar，读取或创建我的 USER_CONFIG.md，检查缺项并让我选择处理方式，由当前宿主工具深入检索、核对核心主张与证据后给出 Q/M/S 和编号结果，等我选择后仅下载所选论文。"

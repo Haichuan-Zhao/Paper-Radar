@@ -1,4 +1,4 @@
-# Research Radar 用户配置 / User configuration
+# Paper-Radar 用户配置 / User configuration
 
 首次使用时，让 agent 将本文件复制为研究工作目录中的 USER_CONFIG.md，再直接编辑。
 也可以把任意位置的配置文件路径告诉 agent。所有表格都可用自然语言填写，中英文均可。
@@ -19,9 +19,11 @@
 | 预印本 / Preprints | 接受，单独标注发表与同行评审状态 |
 | 期刊评级 / Journal metrics | 希望使用 EasyScholar；缺 key 时先让我选择补全或本次跳过 |
 | 缺项处理 / Missing settings | 每次检索前检查，列明影响，由我选择补全或本次接受限制 |
-| 搜索预算 / Search budget | 未指定；agent 按任务安排并如实报告限制 |
-| 结果目录 / Results directory | ./research-radar-results |
-| 下载目录 / Download directory | ./research-radar-downloads |
+| 搜索预算 / Search budget | 最多 6 轮实质性工作；更严格的时间/调用与宿主限制优先，未完成就保存部分交付 |
+| 协作偏好 / Collaboration | 有真实原生子 agent 且获授权时分工；否则顺序自查并标注 |
+| 进展记录 / Progress record | 每个 run 一份 RADAR.md，由 agent 维护，用户不用填写 |
+| 结果目录 / Results directory | ./paper-radar-results |
+| 下载目录 / Download directory | ./paper-radar-downloads |
 
 精读篇数只影响推荐清单长度，不限制检索数量。目录相对本配置文件所在目录。
 

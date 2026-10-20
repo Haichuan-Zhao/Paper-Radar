@@ -16,5 +16,5 @@ jobs:
       - run: node --version
       - run: node --test tests/package.test.mjs
       - run: node scripts/check-skill.mjs
-      - run: node scripts/package-skill.mjs
-      - run: unzip -t dist/research-radar.zip
+      - run: node scripts/package-skill.mjs --check
+      - run: for file in packages/*.zip; do unzip -t "$file"; done

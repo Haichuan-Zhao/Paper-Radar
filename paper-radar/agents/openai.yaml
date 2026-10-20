@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper-Radar"
+  short_description: "研究问题驱动的文献循环：多源发现、事实核验、内容评审与选择后下载"
+  default_prompt: "使用 $paper-radar，读取我的 USER_CONFIG.md，核对配置与本次范围，恢复 RADAR.md 中的进度，循环检索、核验和评审后交付编号结果，等我选择后下载。"
