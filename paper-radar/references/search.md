@@ -46,7 +46,7 @@ Crossref/OpenAlex 用于元数据及关系，arXiv、bioRxiv/medRxiv 按学科�
 
 不同来源不假定支持同一 Boolean 语法或任意全文关键词搜索。
 公共请求正确编码术语，遵守当前限速与 Retry-After；有限重试并保留失败事实。
-用户输入和配置不得直接拼接为可执行 shell；含 key 的接口按 intake 私密规则处理。
+用户输入和配置不得直接拼接为可执行 shell；含 key 的接口按 workflow 私密规则处理。
 
 ## 论文与版本
 

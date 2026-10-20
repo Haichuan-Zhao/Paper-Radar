@@ -1,162 +1,90 @@
 # Paper-Radar
 
-**Start with a research question. Discover, verify, review, and follow the evidence.**
+**Discover and assess papers around your research question.**
 
-[简体中文](README.md) · **English**
+[简体中文](README.md) · **English** · [MIT](LICENSE)
 
-Paper-Radar is a literature research skill executed directly by **Claude Code,
-Codex, and other Agent Skills harnesses**. Provide your question, access settings,
-and budget. The agent searches complementary sources, checks paper and journal
-identity, reads actual evidence, assesses quality and fit, and follows up on gaps.
-One RADAR.md preserves progress, decisions, disagreements, and the recovery point.
+One portable skill executed by Codex, Claude Code, and other Agent Skills hosts:
+**search → verify → read and assess → follow up → numbered results → selected downloads**.
+RADAR.md preserves progress and recovery. Research use needs no Python, Node, or extra model API.
 
-**[Codex workspace](https://github.com/Haichuan-Zhao/Paper-Radar/raw/refs/heads/main/packages/Paper-Radar-Codex.zip)**
-· **[Claude Code workspace](https://github.com/Haichuan-Zhao/Paper-Radar/raw/refs/heads/main/packages/Paper-Radar-Claude-Code.zip)**
-· [Portable skill](https://github.com/Haichuan-Zhao/Paper-Radar/raw/refs/heads/main/packages/paper-radar.zip)
-· MIT
+## Install and configure
 
-## The literature loop
+Download the [latest stable skill](https://github.com/Haichuan-Zhao/Paper-Radar/releases/latest/download/paper-radar.zip)
+or browse [versions and release notes](https://github.com/Haichuan-Zhao/Paper-Radar/releases).
+Extract it and place the complete paper-radar/ folder in one host location:
 
-```mermaid
-flowchart LR
-    A["Question + USER_CONFIG.md"] --> B["Coordinate: choose the next gap"]
-    B --> C["Discover: search and collect evidence"]
-    C --> D["Verify: identity, metrics, sources"]
-    D --> E["Review: claims, quality Q, fit M"]
-    D -->|"Conflict"| C
-    E -->|"Missing evidence or coverage"| B
-    E -->|"Bounded findings"| F["Frozen numbered list"]
-    F --> G["User selection"]
-    G --> H["Retrieve selected papers"]
-    B -.-> R["RADAR.md: progress and recovery"]
-    E -.-> R
-```
+| Host | Personal | Project |
+|---|---|---|
+| Codex | ~/.agents/skills/paper-radar/ | .agents/skills/paper-radar/ |
+| Claude Code | ~/.claude/skills/paper-radar/ | .claude/skills/paper-radar/ |
 
-Discovery, factual verification, and scientific assessment have distinct handoffs.
-Use real native subagents when available and authorized; otherwise run sequentially
-and label self_check. Role names and separate contexts do not establish hard
-isolation or scientific correctness.
-
-## Quick start
-
-1. Download the workspace for your harness, extract it with hidden directories,
-   and open its **Paper-Radar root**. The Codex package contains .agents/skills
-   and .codex/agents; Claude Code contains .claude/skills and .claude/agents.
-2. Edit **USER_CONFIG.md**: your question, dates, requirements, reading intent,
-   own EasyScholar key/secret reference, institutional entry points, and budget.
-   You can supply the current question in chat instead.
-3. Invoke $paper-radar in Codex or /paper-radar in Claude Code:
-
-```text
-Use paper-radar with USER_CONFIG.md in this workspace.
-Search deeply for my research question, verify paper and journal identity,
-review actual full-text evidence for quality and fit, and follow up on gaps.
-If supported, I authorize native subagent collaboration within this task and budget.
-Keep actual progress in RADAR.md. Deliver a frozen numbered list first,
-then wait for my selection before downloading.
-```
-
-The agent checks relevant missing settings before searching and lets you choose
-completion or named limitations. Installation/configuration alone does not launch
-a search. **Research use needs no Python, Node, project command, or new model API.**
-
-For an existing project, copy the complete [paper-radar/](paper-radar/) folder to
-your harness's skill location and optionally copy the [native role templates](adapters/).
-Other hosts use the portable bundle. See [harness guidance](paper-radar/references/harness.md)
-and current [Codex](https://learn.chatgpt.com/docs/build-skills) /
+Ask your agent to follow the [install/update guide](paper-radar/references/install-update.md),
+or copy it manually. Other Agent Skills hosts use the same folder. Local and cloud
+behavior follows current [Codex](https://learn.chatgpt.com/docs/build-skills) and
 [Claude Code](https://code.claude.com/docs/en/skills) documentation.
 
-## One editable configuration
+Keep one USER_CONFIG.md in your research workspace. The agent creates it from the
+[public example](paper-radar/USER_CONFIG.example.md). The main settings are:
 
-The public [USER_CONFIG.example.md](paper-radar/USER_CONFIG.example.md) contains no
-personal values. On first use in an existing workspace the agent copies it to
-USER_CONFIG.md without overwriting an existing file. An explicitly supplied path
-takes precedence; current chat requirements override saved task preferences.
-The agent derives scholarly query families itself.
+- Question, dates, constraints, reading intent, and budget; the current chat can supply them.
+- Your own EasyScholar key/secret reference or lawful local metric table.
+- If enabled, the institution, real library/SSO entry points, account, and browser session.
 
-| Section | Purpose |
-|---|---|
-| Question, dates, constraints, reading intent | Preserve the original request and evaluate real fit |
-| EasyScholar key/secret, local metric tables | Use your own ratings with identity, source, edition and data year |
-| School, library/SSO URLs, domains, account/session | Check actual login routes and article entitlement |
-| Preprints, language, budget, scoring, directories | Control the scope and delivery |
+Keep configuration, papers, and results **outside the installed skill**. Updates replace only the skill.
+Inline credentials are plaintext and may be visible to the host/model; prefer secret references
+or human browser login. Before every search, relevant gaps require a choice to complete setup
+or accept the named limitations for that run.
 
-Defaults are a reading target of ten and six substantive rounds. Each round can
-include multiple queries, pages, evidence collection and a review batch; these
-are not retrieval caps. Unfinished coverage at the budget limit is a partial
-delivery. Change the budget in the document or chat.
+## Use
 
-Inline keys and passwords are plaintext and may be visible to the reading
-host/model. Prefer secret references or human browser login; school passwords
-need not appear in the file. Filled configurations are ignored by Git and are
-not copied into reports or all subagent prompts. EasyScholar supplies ratings,
-not subscription access; a saved account does not establish entitlement.
+Invoke $paper-radar in Codex or /paper-radar in Claude Code:
 
-## Quality, fit, and bounded conclusions
+> Use paper-radar with USER_CONFIG.md. Search deeply for my research question,
+> verify paper and journal identity, and assess quality and fit from actual full text.
+> Follow up on gaps. Save RADAR.md, deliver a fixed numbered list, then wait for my download selection.
 
-| Measure | Default dimensions |
-|---|---|
-| Q, 0–100 | Motivation 15%, originality 15%, rigor 25%, evidence 25%, reproducibility 10%, figures/argument clarity 10% |
-| M, 0–100 | Problem 45%, approach utility 25%, context 20%, reading intent 10% |
-| S | Q^0.6 × M^0.4; default Q/M≥70 and rigor/evidence≥3/5, plus evidence and hard-constraint gates |
+Use native subagents when actually available and authorized; otherwise label sequential self-checks.
+No extra host role files are required. Defaults are six substantive rounds and a reading target
+of ten; the target does not cap discovery. Unfinished work is delivered as partial coverage.
+Select papers from a catalog revision, or specify RADAR.md to pause/resume.
 
-Review central claims, actual support, conditions and counterevidence. Verify
-major criticism too. Prestige, IF, attractive figures and access difficulty add
-no Q/M points. Preprints are not penalized for inapplicable journal ratings;
-publication status and explicit venue/peer-review requirements remain visible.
+Q measures content quality, M fit to the original request; default S=Q^0.6×M^0.4.
+Evidence, rigor, central claims, and hard constraints gate recommendations before ranking.
+Prestige, IF, and attractive styling add no points. Missing full text or decisive evidence leaves
+final Q/S pending. Major criticism needs verification too. Preprints have explicit status;
+EasyScholar supplies ratings rather than subscription access, and login does not prove entitlement.
 
-Missing full text, relevant figures, closest prior-work comparison, or unresolved
-central claims leave final Q/S pending. Qualified findings get narrower wording
-and score limits. Confirmed core evidence failures override the composite score.
-Journal checks preserve DOI/ISSN, edition, category and year; IF does not prove
-WoS inclusion. See [search and verification](paper-radar/references/search.md) and
-[review protocol](paper-radar/references/review.md).
+## Update an installed copy
 
-The rubric assists reading decisions and has no validated field-wide accuracy or
-recall benchmark. Author reports, reviewer judgments, factual checks, and review
-independence are separate observations.
+Ask the agent:
 
-## Two stages, pause, and recovery
+> Update paper-radar to the latest stable release. Identify my actual installation and local edits,
+> verify the release using the update guide, preserve USER_CONFIG.md, secrets, papers and research
+> records, then report the installed version.
 
-Stage one delivers reviewed recommendations, pending access/review, exclusions
-and actual search coverage, with fixed numbers bound to versions. Lawful reading
-and temporary caches are allowed during assessment; archival downloads wait for
-your choice. Ask for papers 1 and 3 from that catalog. Version substitution needs
-a choice; SI, library writes and notifications require a separate request.
+The skill's [VERSION](paper-radar/VERSION) identifies releases. Each release provides one ZIP and
+a per-file hash manifest. Check local changes and back up before replacing the confirmed skill;
+add missing configuration fields without replacing values. Keep a rollback copy outside skill scan paths.
+**git pull updates a source clone, not a skill previously copied into a host.**
+GitHub Source code ZIP downloads have no Git history; download a new stable package instead.
+See [migration rules](paper-radar/references/install-update.md) for unversioned installs, old host
+workspace packages, and local customizations. Ordinary searches do not auto-update the skill.
 
-- **Inspect:** read the current understanding, gaps, disagreements and next step at the top of RADAR.md.
-- **Pause:** ask to save actual evidence, budget and the recovery point.
-- **Resume:** specify RADAR.md and ask the agent to verify artifacts and remaining budget before continuing.
-- **Retrieve:** select numbers from a named catalog revision; reordering never changes old numbers.
+## Maintenance and validation
 
-Tools and institutional access vary by host. Missing capabilities are disclosed;
-logins, downloads, figure inspection and independent review are only reported
-when actually performed. [Loop protocol](paper-radar/references/loop.md) ·
-[Access and retrieval](paper-radar/references/access.md)
+The repository maintains one [skill](paper-radar/), without committed archives or host-specific copies.
+Bump VERSION, push main, then use Actions → Run workflow. CI validates and creates v<version>
+with one portable ZIP and manifest; existing versions are not overwritten. See
+[manual workflow runs](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
+Maintainers use Node.js 20+ standard libraries; these scripts are excluded from installed skills:
 
-## Project and validation
-
-The operating approach draws on [Auto-Loop](https://github.com/Haichuan-Zhao/Auto-Loop):
-task-driven work, separated responsibilities, frozen evidence, review feedback,
-and recoverable progress. Paper-Radar applies those mechanisms to literature.
-
-The repository includes reviewable source and deterministic installation archives.
-Maintainers use Node.js 20+ standard libraries; these scripts are excluded from
-installed skills and research workflows:
-
-```bash
+```sh
 node --test tests/package.test.mjs
-node scripts/check-skill.mjs
-node scripts/package-skill.mjs --check
+node scripts/package-skill.mjs
 ```
 
-[Acceptance scenarios](tests/acceptance.md) and [offline materials](tests/fixtures/casepack.md)
-target decisions; packaging tests do not establish scientific accuracy.
-Native role discovery, live EasyScholar keys, school entitlements and every target
-platform have not all been tested.
-
-This continues ResearchRadar in the same repository under the paper-radar skill
-name. Replace the old skill directory as appropriate; keep personal settings,
-papers and historical assessments.
-
-[MIT License](LICENSE)
+[Acceptance scenarios](tests/acceptance.md) and [synthetic cases](tests/fixtures/casepack.md)
+state what was tested. Distribution tests establish neither scientific accuracy nor universal
+host compatibility; live keys and institutional access depend on the real environment.
+The task loop, responsibility handoffs, and recovery approach draw on [Auto-Loop](https://github.com/Haichuan-Zhao/Auto-Loop).

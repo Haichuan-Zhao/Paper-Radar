@@ -5,29 +5,16 @@ import { fileURLToPath } from 'node:url';
 
 export const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
 export const BUNDLE_FILES = Object.freeze([
-  'LICENSE',
-  'SKILL.md',
-  'USER_CONFIG.example.md',
-  'agents/openai.yaml',
-  'assets/reading-list-template.md',
-  'assets/review-template.md',
-  'assets/radar-template.md',
-  'references/access.md',
-  'references/harness.md',
-  'references/intake.md',
-  'references/loop.md',
-  'references/review.md',
-  'references/search.md',
-  'roles/reviewer.md',
-  'roles/scout.md',
-  'roles/verifier.md',
+  'LICENSE', 'SKILL.md', 'USER_CONFIG.example.md', 'VERSION', 'agents/openai.yaml',
+  'references/access.md', 'references/install-update.md', 'references/outputs.md',
+  'references/review.md', 'references/search.md', 'references/workflow.md',
 ]);
 
-export const ADAPTER_FILES = Object.freeze([
-  'WORKSPACE.md',
-  ...['claude-code', 'codex'].flatMap(host => ['reviewer', 'scout', 'verifier'].map(role =>
-    `${host}/agents/paper-${role}.${host === 'codex' ? 'toml' : 'md'}`)),
-]);
+export async function readVersion(root = PROJECT_ROOT) {
+  const version = (await fs.readFile(path.join(root, 'paper-radar/VERSION'), 'utf8')).trim();
+  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version)) throw new Error('VERSION must be a stable major.minor.patch version.');
+  return version;
+}
 
 // Personal fields in the distributed example must remain empty. Never print values.
 const PRIVATE_FIELDS = [
@@ -116,11 +103,6 @@ export async function validateSkill(root = PROJECT_ROOT) {
   if (JSON.stringify(actual) !== JSON.stringify([...BUNDLE_FILES].sort())) {
     throw new Error('Skill bundle differs from the public allowlist; remove private/unexpected files or review the allowlist.');
   }
-  const adapters = path.join(root, 'adapters');
-  if ((await fs.lstat(adapters)).isSymbolicLink() ||
-      JSON.stringify(await walk(adapters)) !== JSON.stringify([...ADAPTER_FILES].sort())) {
-    throw new Error('Native adapter files differ from the public allowlist.');
-  }
   const skill = await fs.readFile(path.join(bundleRoot, 'SKILL.md'), 'utf8');
   const header = skill.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1];
   if (!header || !/^name: paper-radar$/m.test(header) || !/^description:\s*\S/m.test(header)) {
@@ -131,10 +113,9 @@ export async function validateSkill(root = PROJECT_ROOT) {
   const skillLicense = await fs.readFile(path.join(bundleRoot, 'LICENSE'), 'utf8');
   if (!rootLicense.startsWith('MIT License') || rootLicense !== skillLicense) throw new Error('MIT licenses must match.');
   const documents = ['README.md', 'README.en.md', 'tests/acceptance.md', 'tests/fixtures/casepack.md',
-    ...ADAPTER_FILES.filter(file => file.endsWith('.md')).map(file => `adapters/${file}`),
     ...BUNDLE_FILES.filter(file => file.endsWith('.md')).map(file => `paper-radar/${file}`)];
   for (const file of documents) await checkLinks(root, file);
-  return { files: actual.length, adapters: ADAPTER_FILES.length - 1, documents: documents.length, runtime: 'host-agent' };
+  return { version: await readVersion(root), files: actual.length, documents: documents.length, runtime: 'host-agent' };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

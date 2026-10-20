@@ -1,13 +1,7 @@
 # Paper-Radar 用户配置 / User configuration
 
-首次使用时，让 agent 将本文件复制为研究工作目录中的 USER_CONFIG.md，再直接编辑。
-也可以把任意位置的配置文件路径告诉 agent。所有表格都可用自然语言填写，中英文均可。
-留空表示尚未设置；不需要填写 JSON、检索式或运行命令。
-只做安装/配置不代表已经请求检索。
-
-本文件用于个人本地配置。不要提交填写后的副本到 GitHub，也不要粘贴私密值到聊天。
-直接填写的 key/密码是明文，读取文件的宿主或模型可能看到它们；优先使用宿主 secret
-引用或环境变量名。学校密码优先在真实登录页由用户输入。agent 不回显任何私密值。
+复制为研究工作区的 USER_CONFIG.md 后编辑，放在 skill 安装目录之外。聊天需求优先，空白可后补。
+key/密码为本地明文，宿主或模型可能看到；优先 secret 引用或真实网页登录，不提交 GitHub。
 
 ## 1. 使用偏好 / Preferences
 
@@ -21,11 +15,8 @@
 | 缺项处理 / Missing settings | 每次检索前检查，列明影响，由我选择补全或本次接受限制 |
 | 搜索预算 / Search budget | 最多 6 轮实质性工作；更严格的时间/调用与宿主限制优先，未完成就保存部分交付 |
 | 协作偏好 / Collaboration | 有真实原生子 agent 且获授权时分工；否则顺序自查并标注 |
-| 进展记录 / Progress record | 每个 run 一份 RADAR.md，由 agent 维护，用户不用填写 |
 | 结果目录 / Results directory | ./paper-radar-results |
 | 下载目录 / Download directory | ./paper-radar-downloads |
-
-精读篇数只影响推荐清单长度，不限制检索数量。目录相对本配置文件所在目录。
 
 ## 2. EasyScholar 与其他服务 / Keys and services
 
@@ -39,11 +30,6 @@
 | 其他文献连接器 / Other scholarly connectors | |
 | 本地期刊评级表路径（可选）/ Local journal metric files | |
 | OA 查询联系邮箱（可选）/ OA lookup contact email | |
-
-key 可直接填在对应行，也可只填写私密引用；二者都存在时以可用的私密引用为先，
-不要把占位文字当作有效 key。API 是否可用以本次实际响应为准。
-EasyScholar 提供期刊评级，不授予收费论文权限；OA 联系邮箱也不是学校登录账号。
-未启用的其他服务不必补全。
 
 ## 3. 学校图书馆 / Institutional library
 
@@ -60,12 +46,7 @@ EasyScholar 提供期刊评级，不授予收费论文权限；OA 联系邮箱�
 | 已登录的浏览器或会话说明 / Existing browser session | |
 | 登录方式 / Login method | 优先复用会话，必要时由我在真实网页登录并完成 MFA/验证码 |
 
-账号请填写学校实际使用的邮箱、学号或其他用户名。只给账号密码不能确定学校入口
-或订阅权限；agent 会检查真实页面和文章权限。宿主没有安全私密输入能力时由用户登录。
-
 ## 4. 本次研究任务 / Research task
-
-可以留空，在聊天中提出本次问题；聊天中的明确要求优先于这里保存的偏好。
 
 | 配置项 / Setting | 我的设置 / Value |
 |---|---|
@@ -81,9 +62,6 @@ EasyScholar 提供期刊评级，不授予收费论文权限；OA 联系邮箱�
 | 限定期刊及 ISSN（可选）/ Journal restrictions | |
 | IF/JCR/WoS/CAS/CCF 要求（可选）/ Metric requirements | |
 
-没有日期要求时，agent 使用当地日期向前 90 天并说明。严格评级条件需要实际核验，
-无法核验的候选会标记待核验；不要把方法偏好写成必须条件，除非确实要排除其他方法。
-
 ## 5. 评分偏好 / Assessment preferences
 
 | 配置项 / Setting | 我的设置 / Value |
@@ -93,9 +71,6 @@ EasyScholar 提供期刊评级，不授予收费论文权限；OA 联系邮箱�
 | 最低 M / Minimum fit | 70 |
 | 其他评价要求 / Other review preferences | |
 
-默认 S = Q^α × M^(1−α)。内容维度和证据门槛见 skill 的评分协议；
-改变权重不能绕过未决主张、已确认核心缺陷或证据缺失。
-
 ## 6. 下载偏好 / Download preferences
 
 | 配置项 / Setting | 我的设置 / Value |
@@ -104,4 +79,6 @@ EasyScholar 提供期刊评级，不授予收费论文权限；OA 联系邮箱�
 | 补充材料 / Supplementary information | 仅在我另行请求时下载 |
 | Zotero 或其他文献库 / Library import | 仅在我另行请求时写入 |
 
-保存的目录、账号、评分偏好或“希望阅读 10 篇”都不等于下载选择。
+目录相对本配置文件。未给日期时默认最近 90 天；精读篇数不限制候选池。
+机构关闭时不用填账号；开启时需要真实入口和单篇权限，账号密码不能替代它们。
+只配置不启动检索；保存设置不等于下载选择。更新仅补缺失字段，保留已有值和未知字段。
