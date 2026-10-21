@@ -26,3 +26,9 @@ research-radar-results/
 research-radar-downloads/
 paper-radar-results/
 paper-radar-downloads/
+node_modules/
+/RADAR.md
+/candidates.md
+/papers/
+/selection-catalog*.json
+/downloads/

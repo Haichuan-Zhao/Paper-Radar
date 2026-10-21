@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { BUNDLE_FILES, PROJECT_ROOT, validateSkill } from './check-skill.mjs';
+import { BUNDLE_FILES, PROJECT_ROOT, SKILL_PATH, validateSkill } from './check-skill.mjs';
 
 export const ARCHIVE_NAME = 'paper-radar.zip';
 
@@ -62,7 +62,7 @@ export async function packageSkill({ root = PROJECT_ROOT, outDir = path.join(roo
   const { version } = await validateSkill(root);
   const entries = [];
   for (const file of [...BUNDLE_FILES].sort()) {
-    entries.push({ name: `paper-radar/${file}`, data: await fs.readFile(path.join(root, 'paper-radar', file)) });
+    entries.push({ name: `paper-radar/${file}`, data: await fs.readFile(path.join(root, SKILL_PATH, file)) });
   }
   const archive = makeZip(entries);
   const manifest = {
@@ -78,7 +78,8 @@ export async function packageSkill({ root = PROJECT_ROOT, outDir = path.join(roo
   return manifest;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+const invokedPath = process.argv[1] ? await fs.realpath(process.argv[1]).catch(() => null) : null;
+if (invokedPath === fileURLToPath(import.meta.url)) {
   try {
     if (process.argv.length > 2) throw new Error('Usage: node scripts/package-skill.mjs');
     const manifest = await packageSkill();
