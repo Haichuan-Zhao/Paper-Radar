@@ -22,6 +22,9 @@ config.local.md
 user-config.md
 user-config.json
 USER_CONFIG.md
+USER_CONFIG.local.md
+USER_CONFIG.md.*
+/AGENTS.md
 research-radar-results/
 research-radar-downloads/
 paper-radar-results/
