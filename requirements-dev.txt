@@ -1,0 +1,2 @@
+# Repository checks only; not installed with the skill.
+PyYAML>=6.0,<7

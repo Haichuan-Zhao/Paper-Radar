@@ -1,4 +1,4 @@
 interface:
-  display_name: "Paper-Radar 文献检索与下载"
-  short_description: "对话检索与下载文献，可选个人配置复用服务和图书馆信息，核对来源与版本"
-  default_prompt: "使用 $paper-radar，按本次对话检索或下载论文，沿用可用个人配置中的服务和图书馆设置，核对来源、版本并说明实际结果。"
+  display_name: "Paper-Radar 文献筛选与下载"
+  short_description: "检索相关文献，依据方法、结果和关键图表筛选值得读的论文，支持比较与正文下载"
+  default_prompt: "使用 $paper-radar，按本次对话筛选、比较或下载论文；推荐时说明关键证据与局限，下载时核对所选版本并返回实际文件。"
